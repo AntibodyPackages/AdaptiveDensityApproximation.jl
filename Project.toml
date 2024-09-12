@@ -1,7 +1,7 @@
 name = "AdaptiveDensityApproximation"
 uuid = "56a9bb0d-c37d-45c9-8e6c-6c1c1baae5c6"
 authors = ["Dominik Tschimmel <dominik.tschimmel.contact@gmail.com>"]
-version = "0.3.1"
+version = "0.3.2"
 
 [deps]
 Random = "9a3f8284-a2c9-5f02-9a11-845980a1fd5c"
