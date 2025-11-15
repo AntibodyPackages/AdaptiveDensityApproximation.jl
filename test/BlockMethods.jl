@@ -7,6 +7,8 @@
 
 	@testset "Center" begin
 		@test ADA.center(left) == 1.5
+		@test ADA.center(left, logarithmic = true) ≈ 10.0^((log(10,1)+log(10,2))/2)
+		@test ADA.center(left, logarithmic = true, base = exp(1)) ≈ exp((log(1)+log(2))/2)
 	end
 
 	@testset "Corner points" begin
@@ -55,6 +57,8 @@ end
 
 	@testset "Center" begin
 		@test ADA.center(middle) == [1.5,1.5]
+		@test ADA.center(middle, logarithmic = true) ≈ [10.0^((log(10,1)+log(10,2))/2), 10.0^((log(10,1)+log(10,2))/2)]
+		@test ADA.center(middle, logarithmic = true, base = exp(1)) ≈ [exp(((log(1)+log(2))/2)),exp(((log(1)+log(2))/2))]
 	end
 
 	@testset "Corners" begin

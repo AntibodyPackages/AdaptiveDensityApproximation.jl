@@ -92,12 +92,16 @@ length(cuboid::Cuboid) = length(cuboid.intervals)
 ####################################################################################################
 
 
-@inline function center(interval::Interval)
-	return (interval.left + interval.right)/2
+@inline function center(interval::Interval; logarithmic = false, base = 10.0)
+	if logarithmic
+		return base ^ ((log(base,interval.left)+log(base,interval.right))/2)
+	else
+		return (interval.left + interval.right)/2
+	end
 end
 
-@inline function center(cuboid::Cuboid)
-	return [center(interval) for interval in cuboid.intervals]
+@inline function center(cuboid::Cuboid; args...)
+	return [center(interval; args...) for interval in cuboid.intervals]
 end
 
 @inline function corners(interval::Interval)
@@ -228,12 +232,12 @@ end
 # Dispatch methods for blocks
 ####################################################################################################
 
-function center(block::OneDimBlock)
-	return center(block.interval)
+function center(block::OneDimBlock; args...)
+	return center(block.interval; args...)
 end
 
-function center(block::Block)
-	return center(block.cuboid)
+function center(block::Block; args...)
+	return center(block.cuboid; args...)
 end
 
 function corners(block::OneDimBlock)

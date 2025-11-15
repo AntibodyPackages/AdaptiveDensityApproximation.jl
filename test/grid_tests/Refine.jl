@@ -22,11 +22,20 @@
 	standard_gird_tests(grid,target_centers,target_volumes,target_weights)
 
 
-	# Test weight_splitting.
+	# Test weight_splitting and logarithmic keywords.
 	grid = named_1d_grid()
 	refine!(grid, block_variation = custom_variation, selection = minimum, split_weights = true) 
 	target_weights = [0.5,0.5,2]
 	standard_gird_tests(grid,target_centers,target_volumes,target_weights)
+
+	grid = named_1d_grid()
+	refine!(grid, block_variation = custom_variation, selection = minimum, split_weights = true, logarithmic = true, base = exp(1)) 
+	new_center = exp((log(1)+log(2))/2)
+	target_centers = [(1+new_center)/2,(2+new_center)/2,2.5]
+	target_volumes = [new_center-1,2-new_center,1]
+	target_weights = [target_volumes[1],target_volumes[2],2]
+	standard_gird_tests(grid,target_centers,target_volumes,target_weights)
+
 
 
 	# Test default block variation (should replace both blocks).
@@ -77,10 +86,18 @@ end
 	target_weights = [1,1,3,1,1,4,2]
 	standard_gird_tests(grid,target_centers,target_volumes,target_weights)
 
-	# Test weight_splitting.
+	# Test weight_splitting and logarithmic keywords.
 	grid = named_2d_grid()
 	refine!(grid, block_variation = custom_variation, selection = minimum, split_weights = true)
 	target_weights = [0.25,0.25,3,0.25,0.25,4,2]
+	standard_gird_tests(grid,target_centers,target_volumes,target_weights)
+
+	grid = named_2d_grid()
+	refine!(grid, block_variation = custom_variation, selection = minimum, split_weights = true, logarithmic = true, base = exp(1))
+	new_center = [exp((log(1)+log(2))/2),exp((log(2)+log(3))/2)]
+	target_centers = [[(1+new_center[1])/2,(2+new_center[2])/2],[(1+new_center[1])/2,(3+new_center[2])/2],[1.5,1.5],[(2+new_center[1])/2,(2+new_center[2])/2],[(2+new_center[1])/2,(3+new_center[2])/2],[2.5,1.5],[2.5,2.5]]
+	target_volumes = [abs(1-new_center[1])*abs(2-new_center[2]),abs(1-new_center[1])*abs(3-new_center[2]),1,abs(2-new_center[1])*abs(2-new_center[2]),abs(2-new_center[1])*abs(3-new_center[2]),1,1]
+	target_weights = [target_volumes[1],target_volumes[2],3,target_volumes[4],target_volumes[5],4,2]
 	standard_gird_tests(grid,target_centers,target_volumes,target_weights)
 
 

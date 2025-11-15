@@ -26,22 +26,33 @@ end
 ####################################################################################################
 
 
-"""
+@doc raw"""
 	subdivide!(grid::Union{OneDimGrid,Grid},block_name::AbstractString; 
-		split_weights::Bool = false
+		split_weights::Bool = false,
+		logarithmic::Bool = false,
+		base::Real = 10.0
 	)
 
 Split the block with name `block_name` into `2^dim` sub-blocks. Return the mutated grid.
 
 **Changing the weight splitting**
 
-By default, the subdividing blocks retain the weight of the original block. If `split_weights = true`, the weight of the original block is split up evenly between the subdividing blocks (i.e. divided by the number of subdividing blocks).
+By default, the subdividing blocks retain the weight of the original block. If `split_weights = true`, the weight of the original block is split up proportional to the volumes of the subdividing blocks.
+
+**Logarithmic splitting**
+
+By default, the subdividing blocks split up the original blocks into `2^dim` blocks, where the corners of the subdividing blocks meet at the center point of the original block. If `logarithmic=true`, the center point that would be visible in a logarithmic plot is used. If ``l_i`` and ``u_i`` denote the lower and upper boundary of the block in dimension ``i``, the logarithmic center is given by
+
+```math
+\text{log\_center}_i = \text{base}^{(\log_{\text{base}}(l_i)+ (\log_{\text{base}}(l_i))/2}
+```
+
 """
-function subdivide!(grid::Union{OneDimGrid,Grid},block_name::AbstractString; split_weights::Bool = false)
+function subdivide!(grid::Union{OneDimGrid,Grid},block_name::AbstractString; split_weights::Bool = false, args...)
 
 	block_to_subdivide = grid[block_name]
 
-	subdividing_grid = create_subdividing_grid(block_to_subdivide,collect(keys(grid)), split_weights)
+	subdividing_grid = create_subdividing_grid(block_to_subdivide,collect(keys(grid)), split_weights; args...)
 
 	# Add neighbors form the block_to_subdivide to the subdividing_blocks and vice versa.
 	for subdividing_block in values(subdividing_grid)
@@ -69,7 +80,9 @@ end
 	refine!(grid::Union{OneDimGrid,Grid}; 
 		block_variation::Function = default_block_variation, 
 		selection::Function = maximum, 
-		split_weights::Bool = false
+		split_weights::Bool = false,
+		logarithmic::Bool = false,
+		base::Real = 10.0
 	)
 
 Subdivide intervals/blocks in a grid based on the respective variations. Return the mutated grid and the indices of subdivided (i.e. new) blocks (The index order is the order of [`export_weights`](@ref) and [`export_all`](@ref)).
@@ -82,9 +95,9 @@ By default the variation of a block is the largest difference of weights compare
 * `selection`: Function to select the the blocks based on the variation value. Must have the signature `(variations)`  where variations is a one-dim array of the variation values.
 
 
-**Changing the weight splitting**
+**Weight splitting and logarithmic subdivision**
 
-By default, the subdividing blocks retain the weight of the original block. If `split_weights = true`, the weight of the original block is split up evenly between the subdividing blocks (i.e. divided by the number of subdividing blocks).
+The keywords `split_weights`, `logarithmic` and `base` affect the subdivision of blocks. See [`subdivide!`](@ref) for further information.
 
 **Example**
 
@@ -95,7 +108,7 @@ refine!(grid, block_variation= min_difference, selection = minimum)
 ```
 
 """
-function refine!(grid::Union{OneDimGrid,Grid}; block_variation::Function = default_block_variation, selection::Function = maximum, split_weights::Bool = false)
+function refine!(grid::Union{OneDimGrid,Grid}; block_variation::Function = default_block_variation, selection::Function = maximum, args...)
 	# Get centers before refinements.
 	old_centers = export_all(grid)[1]
 
@@ -109,7 +122,7 @@ function refine!(grid::Union{OneDimGrid,Grid}; block_variation::Function = defau
 	blocks_to_refine = block_names[findall(x -> (x in selected_variation), block_variations)]
 	
 	for block in blocks_to_refine
-		subdivide!(grid, block, split_weights = split_weights)
+		subdivide!(grid, block; args...)
 	end
 
 	# Get centers after refinements
